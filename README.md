@@ -7,3 +7,7 @@ hii - doora
 bye
 
 hii - Lilla
+
+git stash
+git pull
+git stash pop
