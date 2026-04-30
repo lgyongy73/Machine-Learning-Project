@@ -10,7 +10,18 @@ Hanna: Data Architect (Input & Preprocessing)
 Image Standardization: Write a preprocessing script to resize all images to 224x224x3 (RGB) as required by the VGG16 input specifications 
 - GitHub Contribution: Create a data_pipeline.py script that the others can call to feed images into the model.
 
-Instructions for data_reading.py:
+    Instructions for data_reading.py:
+    - the "pneumonia-challenge-dataset-mappings_2018.json" file is needed to categorise the images into healthy (2) and diseased (1) folders, I have uploaded it to GitHub. The data set with the .dcm files is the "Download images from NIH chest x-ray dataset used in the Pneumonia Challenge" download option from https://www.rsna.org/artificial-intelligence/ai-image-challenge/rsna-pneumonia-detection-challenge-2018
+    - data_reading.py needs "pneumonia-challenge-dataset-mappings_2018.json" to be in a master file with the project file (one synced with Github).
+    _ Master file
+        _ pneumonia-challenge-dataset-mappings_2018.json
+        _ Pneumonia_Dataset
+        _ Machine_Learning_Project
+                _ data_reading.py
+                _ README.md
+                _ .gitignore
+    - the downloaded dataset should be named Pneumonia_Dataset and also in the master file along with the project file and the json mapping file.
+    - I accidentally pushed my DS_Store file specific to my MAC, ignore please
 
 Lilla: Model Engineer (VGG16 Architecture)
 
