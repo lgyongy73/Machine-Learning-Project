@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Machine Learning Data (Project Specific)
+*.zip
+*.dcm
+*.csv
+/Pneumonia_Dataset/
+/data/

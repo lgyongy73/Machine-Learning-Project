@@ -10,6 +10,8 @@ Hanna: Data Architect (Input & Preprocessing)
 Image Standardization: Write a preprocessing script to resize all images to 224x224x3 (RGB) as required by the VGG16 input specifications 
 - GitHub Contribution: Create a data_pipeline.py script that the others can call to feed images into the model.
 
+Instructions for data_reading.py:
+
 Lilla: Model Engineer (VGG16 Architecture)
 
 - Responsible for the Feature Learning phase, building the complex VGG16 structure using the Keras library for optimization
