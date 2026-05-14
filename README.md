@@ -26,15 +26,15 @@ Image Standardization: Write a preprocessing script to resize all images to 224x
 Lilla: Model Engineer (VGG16 Architecture)
 
 - Responsible for the Feature Learning phase, building the complex VGG16 structure using the Keras library for optimization
-- Convolutional Blocks: Implement the 13 convolutional layers using specific filters: two layers of 64, two layers of 128 (referenced as 124 in some texts), three layers of 256, and twice three layers of 512 (implemented using the article in the project description)
-- Downsampling: Integrate max-pooling layers after each block to reduce the number of parameters and save memory 7. They must use a stride of 2 for the first three blocks and a stride of 1 for the final block as specified
+- Convolutional Blocks: Implement the 13 convolutional layers using specific filters: two layers of 64, two layers of 128, three layers of 256, and twice three layers of 512 (implemented using the article in the project description)
+- Downsampling: Integrate max-pooling layers after each block to reduce the number of parameters and save memory. They must use a stride of 2 for the first three blocks and a stride of 1 for the final block as specified
+- Dense Layers: Implement the fully connected hidden layer (4096 units) and the final SoftMax classifier to obtain class scores.
 - Customization: Ensure the filters use the required 3x3 kernel size to simplify the stacking process 
 - GitHub Contribution: Create a model_factory.py script that defines the network architecture.
 
 Dori: Training & Analytics Lead (Optimization & Evaluation)
 
 - Manages the Classification and refinement stage, ensuring the system reaches the high accuracy required for medical diagnostics.
-- Dense Layers: Implement the fully connected hidden layer (4096 units) and the final SoftMax classifier to obtain class scores.
 - Optimization Logic: Set up the training loop where the model calculates errors and backtracks to update the weights of the filters until the error is minimized.
 - Performance Metrics: Derive a confusion matrix to analyze how accurately the model classifies benign vs. malignant (or in this case, pneumonia vs. normal) instances.
 - GitHub Contribution: Create a main_trainer.py script that imports the data and model scripts to execute the training and generate reports.
