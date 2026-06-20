@@ -32,7 +32,7 @@ Lilla: Model Engineer (VGG16 Architecture)
 - Customization: Ensure the filters use the required 3x3 kernel size to simplify the stacking process 
 - GitHub Contribution: Create a model_factory.py script that defines the network architecture.
 
-Dori: Training & Analytics Lead (Optimization & Evaluation)
+Dóri: Training & Analytics Lead (Optimization & Evaluation)
 
 - Manages the Classification and refinement stage, ensuring the system reaches the high accuracy required for medical diagnostics.
 - Optimization Logic: Set up the training loop where the model calculates errors and backtracks to update the weights of the filters until the error is minimized.

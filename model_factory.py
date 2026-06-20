@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cv2
 import keras
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Input
+from keras.layers import Conv2D, MaxPool2D, Flatten, Dense, Dropout, Input
 
 # Build Convolutional Blocks
 # Sources:
@@ -63,7 +63,9 @@ def build_vgg16_base(input_shape=(224, 224, 3)):
     # Sixth block: 2 fully connected hidden layer containing 4096 units, then a 1000-unit softmax output layer
     model.add(Flatten())
     model.add(Dense(4096, activation="relu"))
+    model.add(Dropout(0.5))
     model.add(Dense(4096, activation="relu"))
+    model.add(Dropout(0.5))
     model.add(Dense(2, activation="softmax"))
 
     # Now we have 16 layers altogether
@@ -72,4 +74,7 @@ def build_vgg16_base(input_shape=(224, 224, 3)):
 
     return model
 
-model= build_vgg16_base()
+if __name__ == "__main__":
+    #only runs when explicitly called
+    
+    model = build_vgg16_base()
