@@ -60,6 +60,7 @@ def build_vgg16_base(input_shape=(224, 224, 3)):
     model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu"))
     model.add(MaxPool2D(pool_size=(2,2),strides=(1,1)))
 
+    '''
     # Sixth block: 2 fully connected hidden layer containing 4096 units, then a 1000-unit softmax output layer
     model.add(Flatten())
     model.add(Dense(4096, activation="relu"))
@@ -67,6 +68,7 @@ def build_vgg16_base(input_shape=(224, 224, 3)):
     model.add(Dense(4096, activation="relu"))
     model.add(Dropout(0.5))
     model.add(Dense(2, activation="softmax"))
+    '''
 
     # Now we have 16 layers altogether
     print("Done!")

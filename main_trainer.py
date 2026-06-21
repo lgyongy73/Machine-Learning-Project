@@ -1,121 +1,141 @@
-# Imports
+# IMPORTS
 
-import numpy as np
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
-from keras.models import Model
-from keras.layers import Dense, Flatten, Dropout, Input
-from keras.optimizers import Adam
-from pathlib import Path
 import cv2
-from keras.utils import to_categorical
-import sklearn.preprocessing
+from keras.layers import Dense, Flatten, Dropout, Rescaling, Input
+from keras.models import Model
+from keras.optimizers import Adam
+from keras.utils import to_categorical8
 import matplotlib.pyplot as plt
+import numpy as np
+from pathlib import Path
+from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+import tensorflow as tf
 
 from data_reading import build_dataset   # preprocessing script
 from model_factory import build_vgg16_base  # VGG16 architecture
 
-# Functions
+# CHECK
 
-def load_split(split_path):
+# check if GPU is available (runs too slow, if not)
+print("Is GPU available: ", tf.config.list_physical_devices('GPU'))
+
+# FUNCTIONS
+
+def load_data():
     '''
-    Iterates through the subfolders of a split (train or test or val),
-    loads images, and assigns labels.
+    Reads the data from the folder structure built for the project,
+    the code can utilize the created variables.
     '''
 
-    data = []
-    categories = ['normal', 'pneumonia']
+    # generators for all three splits
+    train_ds = tf.keras.utils.image_dataset_from_directory(
+        'data/train',
+        image_size = (224, 224),
+        batch_size = 32,
+        label_mode = 'categorical'
+    )
+
+    val_ds = tf.keras.utils.image_dataset_from_directory(
+        'data/val',
+        image_size = (224, 224),
+        batch_size = 32,
+        label_mode = 'categorical'
+    )
+
+    test_ds = tf.keras.utils.image_dataset_from_directory(
+        'data/test',
+        image_size = (224, 224),
+        batch_size = 32,
+        label_mode = 'categorical'
+    )
+
+    AUTOTUNE = tf.data.AUTOTUNE
+    train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
+    val_ds = val_ds.prefetch(buffer_size=AUTOTUNE)
+    test_ds = test_ds.prefetch(buffer_size=AUTOTUNE)
+
+    return train_ds, val_ds, test_ds
+
+def build_model():
+    '''
+    Creates the full model structure,
+    imports the base, then adds flattening and dense layers.
+    '''
     
-    for category in categories:
-        # path to the specific category folder (e.g. 'data/train/normal')
-        path = Path(split_path) / category
-        label = categories.index(category) # 0 for normal, 1 for pneumonia
-        
-        # finds all .png files in the folder
-        for img_path in path.glob('*.png'):
-            # loads the image in color as required
-            image = cv2.imread(str(img_path))
-            if image is not None:
-                # appends a tuple of (image_matrix, label)
-                data.append((image, label))
-                
-    return data
-def extract_data():
+    # imports the VGG16 base
+    model_base = build_vgg16_base(input_shape = (224, 224, 3))
+    # freezes the base / reduces parameters to be fitted
+    model_base.trainable = False
+    inputs = Input(shape=(224, 224, 3))
+    x = Rescaling(1./255)(inputs) 
+
+    x = model_base(x)
+
+    x = Flatten()(x)
+    x = Dense(4096, activation='relu')(x)
+    x = Dropout(0.5)(x)
+
+    predictions = Dense(2, activation='softmax')(x)
+
+    # pieces the model together
+    model = Model(inputs = inputs, outputs = predictions)
+    model.compile(loss = 'categorical_crossentropy',
+                  optimizer = Adam(learning_rate=0.001),
+                  metrics = ['accuracy'])
+    
+    return model
+
+def fitting(model, train_ds, val_ds):
+    
+    print('Fitting model...')
+    history = model.fit(
+        train_ds,
+        epochs = 10,
+        validation_data = val_ds
+    )
+
+    return history
+
+def evaluation(model, history, test_ds):
     '''
-    Converts the images stored on the local disk
-    into variables that can be referred to in python.
-    '''
+    Generates the evaluation report,
+    derives the confusion matrix
+    and plots the training history.
 
-    print('Extracting images into memory...')
-    train_data = load_split('data/train')
-    val_data = load_split('data/val')
-    test_data = load_split('data/test')
-
-    X_train = np.array([x for x, y in train_data])
-    y_train = np.array([y for x, y in train_data])
-
-    X_val = np.array([x for x, y in val_data])
-    y_val = np.array([y for x, y in val_data])
-
-    X_test = np.array([x for x, y in test_data])
-    y_test = np.array([y for x, y in test_data])
-
-    # scales pixel values for better optimization
-    X_train = X_train.astype('float32') / 255.0
-    X_val = X_val.astype('float32') / 255.0
-    X_test = X_test.astype('float32') / 255.0
-
-    # converts labels to one-hot encoding for the softmax classifier
-    y_train = to_categorical(y_train, 2)
-    y_val = to_categorical(y_val, 2)
-    y_test = to_categorical(y_test, 2)
-
-    return X_train, y_train, X_val, y_val, X_test, y_test
-
-# Runtime
-
-X_train, y_train, X_val, y_val, X_test, y_test = extract_data()
-
-# imports the 13-layer VGG16 base
-model = build_vgg16_base()
-
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-print('Fitting model...')
-model.fit(X_train, y_train, epochs=10, batch_size=128)
-
-pred = model.predict(X_train)
-res = sklearn.preprocessing.OneHotEncoder.inverse_transform(pred).reshape(-1)
-
-print('Deriving the confusion matrix...')
-confusion_matrix = confusion_matrix(res, y_train)
-plt.imshow(confusion_matrix)
-
-print(accuracy_score(y_train,res))
-
-"""
-def train_model():
-    '''
-    Function to manage the classification, optimization, and evaluation stages.
+    Aims to characterize the precision of the fit.
     '''
 
-#if __name__ == "__main__":
-    model_done = train_model()
-"""
+    print("Generating evaluation report...")
 
-'''
-STORE
+    # predicts on the test set
+    y_true = np.concatenate([y for x, y in test_ds], axis=0)
+    y_true = np.argmax(y_true, axis=1)
 
-build_dataset('../Pneumonia_Dataset/mdai_rsna_project_x9N20BZa_images_2018-07-20-153330')
+    y_pred = model.predict(test_ds)
+    y_pred_classes = np.argmax(y_pred, axis=1)
 
-# generating report
-print("Generating report...")
-y_pred = model.predict(X_test)
-y_true = np.argmax(y_test, axis=1)
-y_pred_classes = np.argmax(y_pred, axis=1)
-print("\nClassification report:\n", classification_report(y_true, y_pred_classes))
+    print(classification_report(y_true, y_pred_classes))
 
-# generating confusion matrix
-print("Generating confusion matrix...")
-cm = confusion_matrix(y_true, y_pred_classes)
-print("Confusion Matrix:\n", cm)
-'''
+    print('Deriving the confusion matrix...')
+    cm = confusion_matrix(y_true, y_pred_classes)
+    print(cm)
+    plt.imshow(cm)
+    plt.show()
+
+    print('Plotting training history...')
+    plt.plot(history.history['accuracy'], label='train_acc')
+    plt.plot(history.history['val_accuracy'], label='val_acc')
+    plt.legend()
+    plt.show()
+
+    return cm
+
+# RUNTIME
+
+if __name__ == "__main__":
+
+    build_dataset('../Pneumonia_Dataset/mdai_rsna_project_x9N20BZa_images_2018-07-20-153330')
+    train_ds, val_ds, test_ds = load_data()
+    model = build_model()
+    history = fitting(model, train_ds, val_ds)
+    confusionmatrix = evaluation(model, history, test_ds)
