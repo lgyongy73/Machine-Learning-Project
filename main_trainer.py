@@ -4,7 +4,7 @@ import cv2
 from keras.layers import Dense, Flatten, Dropout, Rescaling, Input
 from keras.models import Model
 from keras.optimizers import Adam
-from keras.utils import to_categorical8
+#from keras.utils import to_categorical8
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
