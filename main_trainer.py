@@ -31,18 +31,19 @@ def load_data():
     '''
 
     bs = 8
+    size = 128 # 128 or 224
 
     # generators for all three splits, data shuffled / in random order
     train_ds = tf.keras.utils.image_dataset_from_directory(
         'data/train',
-        image_size = (224, 224),
+        image_size = (size, size),
         batch_size = bs,
         label_mode = 'categorical'
     )
 
     val_ds = tf.keras.utils.image_dataset_from_directory(
         'data/val',
-        image_size = (224, 224),
+        image_size = (size, size),
         batch_size = bs,
         label_mode = 'categorical',
         shuffle = False
@@ -50,7 +51,7 @@ def load_data():
 
     test_ds = tf.keras.utils.image_dataset_from_directory(
         'data/test',
-        image_size = (224, 224),
+        image_size = (size, size),
         batch_size = bs,
         label_mode = 'categorical',
         shuffle = False
@@ -70,10 +71,10 @@ def build_model():
     '''
     
     # imports the VGG16 base
-    model_base = build_vgg16_base(input_shape = (224, 224, 3))
+    model_base = build_vgg16_base(input_shape = (128, 128, 3)) # 128 or 224
     # freezes the base / reduces parameters to be fitted
     model_base.trainable = False
-    inputs = Input(shape=(224, 224, 3))
+    inputs = Input(shape=(128, 128, 3)) # 128 or 224
     x = Rescaling(1./255)(inputs) 
 
     x = model_base(x)
@@ -89,6 +90,7 @@ def build_model():
     model.compile(loss = 'categorical_crossentropy',
                   optimizer = Adam(learning_rate=1e-4),
                   metrics = ['accuracy'])
+    print(model.summary())
     
     return model
 
