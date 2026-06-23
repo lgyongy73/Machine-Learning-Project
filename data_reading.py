@@ -42,7 +42,7 @@ def build_dataset(base_source_path):
                     if file.endswith(".dcm"):
                         ds = pydicom.dcmread(os.path.join(root, file))
                         img = ds.pixel_array
-                        img_resized = cv2.resize(img, (224, 224))
+                        img_resized = cv2.resize(img, (224, 224)) # 224 or 128
                         #reads the dcm file using the built in python pydicom library (made for reading dcm files)
                         
                         #the VGG16 model need RGB as that is what it was trained on, so we convert
